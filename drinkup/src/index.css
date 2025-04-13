@@ -15,6 +15,48 @@
   animation: slide-up 0.4s ease-out;
 }
 
+@media (max-width: 640px) {
+  #root {
+    padding: 0.5rem;
+    margin: 0;
+    width: 100%;
+  }
+}
+
+/* Ensure modals are properly positioned on mobile */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1rem;
+}
+
+/* Safe area insets for modern mobile browsers */
+@supports(padding: max(0px)) {
+  .safe-area-inset {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
 
 
 

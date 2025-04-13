@@ -58,9 +58,9 @@ function App() {
         <DailyTip onClose={() => setShowDailyTip(false)} />
       )}
       
-      <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 p-2 sm:p-6">
+      <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 px-3 py-4 sm:p-6">
         <div className="max-w-md mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-lg p-4 sm:p-8 border border-pink-100">
-          <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <div className="flex justify-between items-center mb-3 sm:mb-6">
             <Greeting name="Teniola" />
             <button
               onClick={() => setShowAchievements(true)}
@@ -70,23 +70,28 @@ function App() {
               🏆
             </button>
           </div>
-          <Motivation intake={intake} goal={dailyGoal} />
-          <Streak days={streak} />
-          <ProgressBar 
-            current={intake} 
-            goal={dailyGoal}
-            className="bg-gradient-to-r from-pink-400 to-purple-400" 
-          />
-          <IntakeDisplay current={intake} goal={dailyGoal} />
-          <WaterButtons onAddWater={addWater} />
-          <button
-            onClick={() => setShowGoalSetter(true)}
-            className="w-full text-pink-500 text-sm mb-4 hover:text-pink-600 transition"
-          >
-            ✨ Customize your daily goal ✨
-          </button>
+          
+          <div className="space-y-4 sm:space-y-6">
+            <Motivation intake={intake} goal={dailyGoal} />
+            <Streak days={streak} />
+            <ProgressBar 
+              current={intake} 
+              goal={dailyGoal}
+              className="bg-gradient-to-r from-pink-400 to-purple-400" 
+            />
+            <IntakeDisplay current={intake} goal={dailyGoal} />
+            <WaterButtons onAddWater={addWater} />
+            <button
+              onClick={() => setShowGoalSetter(true)}
+              className="w-full text-pink-500 text-sm py-2 hover:text-pink-600 transition"
+            >
+              ✨ Customize your daily goal ✨
+            </button>
+          </div>
+          
           <Celebration show={showCelebration} />
           
+          {/* Modals */}
           {showGoalSetter && (
             <CustomGoal 
               currentGoal={dailyGoal}
@@ -113,6 +118,7 @@ function App() {
 }
 
 export default App
+
 
 
 
