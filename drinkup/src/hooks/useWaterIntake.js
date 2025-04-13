@@ -13,7 +13,7 @@ export default function useWaterIntake(initialGoal = 3000) {
     const today = new Date().toDateString()
 
     if (savedData.date === today) {
-      setIntake(savedData.intake)
+      setIntake(savedData.intake || 0)
       setDailyGoal(savedData.dailyGoal || initialGoal)
       setStreak(savedData.streak || 0)
       setLastCompletedDate(savedData.lastCompletedDate)
@@ -29,6 +29,15 @@ export default function useWaterIntake(initialGoal = 3000) {
         }
       }
       setIntake(0)
+      
+      // Save new day's initial state
+      localStorage.setItem('drinkup', JSON.stringify({
+        date: today,
+        intake: 0,
+        dailyGoal,
+        streak,
+        lastCompletedDate
+      }))
     }
   }, [])
 
@@ -66,4 +75,5 @@ export default function useWaterIntake(initialGoal = 3000) {
     setDailyGoal
   }
 }
+
 

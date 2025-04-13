@@ -58,14 +58,14 @@ function App() {
         <DailyTip onClose={() => setShowDailyTip(false)} />
       )}
       
-      <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 px-3 py-4 sm:p-6">
-        <div className="max-w-md mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-lg p-4 sm:p-8 border border-pink-100">
+      <div className="min-h-screen bg-gradient-to-b from-blue-800 to-blue-950 flex items-center justify-center p-3 sm:p-6">
+        <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-xl p-4 sm:p-8 border border-blue-200">
           <div className="flex justify-between items-center mb-3 sm:mb-6">
             <Greeting name="Teniola" />
             <button
               onClick={() => setShowAchievements(true)}
-              className="p-2 rounded-full bg-gradient-to-r from-pink-100 to-purple-100 
-                       text-pink-500 hover:text-pink-600 transition"
+              className="p-2 rounded-full bg-gradient-to-r from-blue-100 to-blue-200 
+                       text-blue-600 hover:text-blue-700 transition"
             >
               🏆
             </button>
@@ -77,13 +77,13 @@ function App() {
             <ProgressBar 
               current={intake} 
               goal={dailyGoal}
-              className="bg-gradient-to-r from-pink-400 to-purple-400" 
+              className="bg-gradient-to-r from-blue-500 to-pink-500" 
             />
             <IntakeDisplay current={intake} goal={dailyGoal} />
             <WaterButtons onAddWater={addWater} />
             <button
               onClick={() => setShowGoalSetter(true)}
-              className="w-full text-pink-500 text-sm py-2 hover:text-pink-600 transition"
+              className="w-full text-blue-600 text-sm py-2 hover:text-blue-700 transition"
             >
               ✨ Customize your daily goal ✨
             </button>
@@ -93,23 +93,27 @@ function App() {
           
           {/* Modals */}
           {showGoalSetter && (
-            <CustomGoal 
-              currentGoal={dailyGoal}
-              onSave={(newGoal) => {
-                setDailyGoal(newGoal)
-                setShowGoalSetter(false)
-              }}
-              onClose={() => setShowGoalSetter(false)}
-            />
+            <div className="fixed inset-0 bg-blue-950/50 flex items-center justify-center p-3 sm:p-6 z-50">
+              <CustomGoal 
+                currentGoal={dailyGoal}
+                onSave={(newGoal) => {
+                  setDailyGoal(newGoal)
+                  setShowGoalSetter(false)
+                }}
+                onClose={() => setShowGoalSetter(false)}
+              />
+            </div>
           )}
           
           {showAchievements && (
-            <AchievementBadges 
-              streak={streak} 
-              intake={intake} 
-              goal={dailyGoal}
-              onClose={() => setShowAchievements(false)}
-            />
+            <div className="fixed inset-0 bg-blue-950/50 flex items-center justify-center p-3 sm:p-6 z-50">
+              <AchievementBadges 
+                streak={streak} 
+                intake={intake} 
+                goal={dailyGoal}
+                onClose={() => setShowAchievements(false)}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -118,6 +122,9 @@ function App() {
 }
 
 export default App
+
+
+
 
 
 

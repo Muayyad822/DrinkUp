@@ -8,12 +8,14 @@ export default function Greeting({ name }) {
 
   return (
     <div className="text-left">
-      <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+      <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-pink-500 bg-clip-text text-transparent">
         {getGreeting()}, {name} 💖
       </h1>
-      <p className="text-gray-600 text-xs sm:text-sm">Let's stay hydrated today!</p>
+      <p className="text-blue-600 text-xs sm:text-sm">Let's stay hydrated today!</p>
     </div>
   )
 }
+
+
 
 
