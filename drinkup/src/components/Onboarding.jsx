@@ -80,7 +80,7 @@ export default function Onboarding({ onComplete }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-pink-100 to-purple-100 flex items-center justify-center p-3 sm:p-6 z-50">
+    <div className="fixed inset-0 bg-gradient-to-b from-blue-800 to-blue-950 flex items-center justify-center p-3 sm:p-6 z-50">
       <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-4 sm:p-8 max-w-md w-full">
         <div className="space-y-4 sm:space-y-6">
           {/* Progress dots */}
@@ -123,3 +123,4 @@ export default function Onboarding({ onComplete }) {
     </div>
   )
 }
+
