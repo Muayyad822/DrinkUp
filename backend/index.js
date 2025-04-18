@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { notificationTimes } from './config/notifications.js';
 import { pushNotificationService } from './services/pushNotification.js';
-import notificationRoutes from './routes/notifications.js';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +29,21 @@ webpush.setVapidDetails(
 );
 
 // API Routes
-app.use('/api', notificationRoutes);
+app.get('/api/vapid-public-key', (req, res) => {
+  res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
+});
+
+app.post('/api/save-subscription', (req, res) => {
+  try {
+    const subscription = req.body;
+    const totalSubscriptions = pushNotificationService.addSubscription(subscription);
+    res.status(201).json({ message: 'Subscription saved' });
+    console.log('New subscription saved. Total subscriptions:', totalSubscriptions);
+  } catch (error) {
+    console.error('Error saving subscription:', error);
+    res.status(500).json({ error: 'Subscription failed' });
+  }
+});
 
 // Serve static files from the React app
 app.use(express.static(join(__dirname, '../drinkup/dist')));
@@ -43,8 +56,8 @@ notificationTimes.forEach(time => {
   });
 });
 
-// Catch-all route to serve the React app
-app.get('/*', (req, res) => {
+// The catch-all route should be last
+app.get('/', (req, res) => {
   res.sendFile(join(__dirname, '../drinkup/dist/index.html'));
 });
 
