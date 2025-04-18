@@ -3,14 +3,8 @@ import webpush from 'web-push';
 import cors from 'cors';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 import { notificationTimes } from './config/notifications.js';
 import { pushNotificationService } from './services/pushNotification.js';
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -19,7 +13,14 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://drink-up-nine.vercel.app/', 
+    'http://localhost:5173' // For local development
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 
 // Configure web-push
 webpush.setVapidDetails(
@@ -45,8 +46,10 @@ app.post('/api/save-subscription', (req, res) => {
   }
 });
 
-// Serve static files from the React app
-app.use(express.static(join(__dirname, '../drinkup/dist')));
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'DrinkUp API is running' });
+});
 
 // Schedule notifications
 notificationTimes.forEach(time => {
@@ -54,11 +57,6 @@ notificationTimes.forEach(time => {
   cron.schedule(`${minutes} ${hours} * * *`, () => {
     pushNotificationService.sendNotifications(time);
   });
-});
-
-// The catch-all route should be last
-app.get('/', (req, res) => {
-  res.sendFile(join(__dirname, '../drinkup/dist/index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
