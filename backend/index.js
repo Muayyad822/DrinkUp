@@ -15,7 +15,8 @@ const app = express();
 app.use(express.json());
 app.use(cors({
   origin: [
-    'https://drink-up-nine.vercel.app/', 
+    'https://drink-up-nine.vercel.app', // Your Vercel domain
+    'https://drinkup.vercel.app',
     'http://localhost:5173' // For local development
   ],
   methods: ['GET', 'POST'],

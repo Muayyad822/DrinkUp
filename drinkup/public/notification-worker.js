@@ -8,7 +8,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll([
         '/',
         '/index.html',
-        '/water-drop.png'
+        '/assets/water-drop.png' // Updated path
       ]);
     })
   );
@@ -41,8 +41,8 @@ self.addEventListener('push', (event) => {
     notification = {
       title: 'DrinkUp 💧',
       body: 'Hey Teniola, time to drink some water!',
-      icon: '/water-drop.png',
-      badge: '/water-drop.png',
+      icon: '/assets/water-drop.png', // Updated path
+      badge: '/assets/water-drop.png', // Updated path
       timestamp: Date.now()
     };
   }
@@ -99,4 +99,5 @@ self.addEventListener('notificationclick', (event) => {
       })
   );
 });
+
 
