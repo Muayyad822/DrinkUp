@@ -1,66 +1,82 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 export default function useNotifications() {
   useEffect(() => {
-    const requestAndRegisterNotifications = async () => {
+    const setupNotifications = async () => {
       try {
-        // Check if the browser supports notifications
-        if (!('Notification' in window)) {
-          console.log('This browser does not support notifications')
-          return
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+          console.log('Push notifications not supported');
+          return;
         }
-
-        // Check if service worker is supported
-        if (!('serviceWorker' in navigator)) {
-          console.log('Service Worker is not supported')
-          return
-        }
-
-        // Request permission
-        const permission = await Notification.requestPermission()
-        
+ 
+        const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          console.log('Notification permission not granted')
-          return
+          console.log('Notification permission denied');
+          return;
         }
 
-        // Register service worker for notifications
-        const registration = await navigator.serviceWorker.register('/notification-worker.js')
+        // Register service worker with immediate claim
+        const registration = await navigator.serviceWorker.register('/notification-worker.js', {
+          scope: '/',
+          updateViaCache: 'none'
+        });
+
+        // Ensure the service worker is activated
+        if (registration.active) {
+          await registration.update();
+        }
+
+        // Get existing subscription or create new one
+        let subscription = await registration.pushManager.getSubscription();
         
-        const notificationTimes = ['8:00', '11:00', '14:00', '17:00', '20:00']
-        
-        const checkTime = () => {
-          const now = new Date()
-          const currentTime = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
+        if (!subscription) {
+          const response = await fetch(`${BACKEND_URL}/api/vapid-public-key`);
+          const { publicKey } = await response.json();
           
-          if (notificationTimes.includes(currentTime)) {
-            // Try both service worker and regular notification
-            if (registration.showNotification) {
-              registration.showNotification('DrinkUp 💧', {
-                body: 'Hey Teniola, time to drink some water!',
-                icon: '/water-drop.png',
-                badge: '/water-drop.png',
-                vibrate: [200, 100, 200],
-                tag: 'water-reminder',
-                renotify: true
-              })
-            } else {
-              new Notification('DrinkUp 💧', {
-                body: 'Hey Teniola, time to drink some water!',
-                icon: '/water-drop.png'
-              })
-            }
-          }
+          const convertedVapidKey = urlBase64ToUint8Array(publicKey);
+          
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+          });
+
+          // Save subscription to backend
+          await fetch(`${BACKEND_URL}/api/save-subscription`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(subscription)
+          });
+          
+          console.log('Push notification subscription successful');
         }
-
-        const timeInterval = setInterval(checkTime, 60000)
-        return () => clearInterval(timeInterval)
-
       } catch (error) {
-        console.error('Error setting up notifications:', error)
+        console.error('Error setting up push notifications:', error);
       }
-    }
+    };
 
-    requestAndRegisterNotifications()
-  }, [])
+    setupNotifications();
+  }, []);
 }
+
+// Helper function to convert VAPID key
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+
+
