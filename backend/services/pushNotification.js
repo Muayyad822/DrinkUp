@@ -89,7 +89,7 @@ export class PushNotificationService {
     const payload = JSON.stringify({
       title: notificationData.title || 'DrinkUp 💧',
       body: notificationData.body || 'Time to drink some water!',
-      icon: notificationData.icon || '/assets/water-drop.png',
+      icon: notificationData.icon || '/water-drop.png', // Update path
       timestamp: Date.now()
     });
 
@@ -135,5 +135,6 @@ export class PushNotificationService {
 }
 
 export const pushNotificationService = new PushNotificationService();
+
 
 

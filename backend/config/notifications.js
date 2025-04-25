@@ -7,8 +7,9 @@ export const notificationTimes = [
 export const createPayload = () => ({
   title: 'DrinkUp 💧',
   body: 'Hey Teniola, time to drink some water!',
-  icon: '/water-drop.png',
-  badge: '/water-drop.png',
+  icon: '/water-drop.png', // Update path
+  badge: '/water-drop.png', // Update path
   timestamp: Date.now()
 });
  
+

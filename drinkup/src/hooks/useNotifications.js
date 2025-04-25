@@ -18,10 +18,16 @@ export default function useNotifications() {
         }
 
         console.log('Registering service worker...');
+        // Wait for any existing service worker to become activated
+        await navigator.serviceWorker.ready;
+        
         const registration = await navigator.serviceWorker.register('/notification-worker.js', {
           scope: '/',
-          updateViaCache: 'none'
+          type: 'module'
         });
+
+        // Wait for the service worker to be ready
+        await navigator.serviceWorker.ready;
 
         console.log('Service worker registered');
 
@@ -78,6 +84,8 @@ function urlBase64ToUint8Array(base64String) {
   }
   return outputArray;
 }
+
+
 
 
 
