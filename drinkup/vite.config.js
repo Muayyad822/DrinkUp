@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['water-drop.png', 'favicon.svg'],
+      includeAssets: ['water-drop.png', 'favicon.svg', 'notification-worker.js'],
       manifest: {
         name: 'DrinkUp',
         short_name: 'DrinkUp',
@@ -29,7 +29,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        swDest: 'notification-worker.js'
       }
     })
   ],
@@ -38,6 +39,7 @@ export default defineConfig({
     copyPublicDir: true
   }
 })
+
 
 
 
