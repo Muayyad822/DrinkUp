@@ -17,33 +17,33 @@ export default function useNotifications() {
           return;
         }
 
-        // Register service worker with immediate claim
+        console.log('Registering service worker...');
         const registration = await navigator.serviceWorker.register('/notification-worker.js', {
           scope: '/',
           updateViaCache: 'none'
         });
 
-        // Ensure the service worker is activated
-        if (registration.active) {
-          await registration.update();
-        }
+        console.log('Service worker registered');
 
         // Get existing subscription or create new one
         let subscription = await registration.pushManager.getSubscription();
+        console.log('Existing subscription:', subscription);
 
         if (!subscription) {
+          console.log('Fetching VAPID public key...');
           const response = await fetch(`${BACKEND_URL}/api/vapid-public-key`);
           const { publicKey } = await response.json();
           
           const convertedVapidKey = urlBase64ToUint8Array(publicKey);
           
+          console.log('Creating new subscription...');
           subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: convertedVapidKey
           });
 
-          // Save subscription to backend
-          await fetch(`${BACKEND_URL}/api/save-subscription`, {
+          console.log('New subscription created, sending to backend...');
+          const saveResponse = await fetch(`${BACKEND_URL}/api/save-subscription`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -51,10 +51,11 @@ export default function useNotifications() {
             body: JSON.stringify(subscription)
           });
           
-          console.log('Push notification subscription successful');
+          const saveResult = await saveResponse.json();
+          console.log('Save subscription response:', saveResult);
         }
       } catch (error) {
-        console.error('Error setting up push notifications:', error);
+        console.error('Notification setup error:', error);
       }
     };
 
@@ -77,6 +78,7 @@ function urlBase64ToUint8Array(base64String) {
   }
   return outputArray;
 }
+
 
 
 

@@ -16,18 +16,31 @@ export class PushNotificationService {
 
   async loadSubscriptions() {
     try {
+      console.log('Loading subscriptions from:', this.subscriptionsFile);
+      
+      // Check if file exists
+      try {
+        await fs.access(this.subscriptionsFile);
+      } catch {
+        console.log('Subscriptions file does not exist, creating new one');
+        await this.saveSubscriptions();
+        return;
+      }
+
       const data = await fs.readFile(this.subscriptionsFile, 'utf8');
+      console.log('Raw subscriptions data:', data);
+      
       const subs = JSON.parse(data);
       if (Array.isArray(subs)) {
         this.subscriptions = new Set(subs);
       } else {
+        console.log('Invalid subscriptions data format, resetting');
         this.subscriptions = new Set();
       }
       console.log(`Loaded ${this.subscriptions.size} subscriptions`);
     } catch (error) {
-      console.log('No existing subscriptions found, creating new storage');
+      console.error('Error loading subscriptions:', error);
       this.subscriptions = new Set();
-      // Create the file with an empty array
       await this.saveSubscriptions();
     }
   }
@@ -35,27 +48,35 @@ export class PushNotificationService {
   async saveSubscriptions() {
     try {
       const subscriptionsArray = Array.from(this.subscriptions);
+      console.log('Saving subscriptions:', {
+        count: subscriptionsArray.length,
+        file: this.subscriptionsFile
+      });
+      
       await fs.writeFile(
         this.subscriptionsFile,
         JSON.stringify(subscriptionsArray, null, 2)
       );
-      console.log(`Saved ${this.subscriptions.size} subscriptions`);
+      
+      console.log('Subscriptions saved successfully');
     } catch (error) {
       console.error('Error saving subscriptions:', error);
+      throw error; // Propagate error to caller
     }
   }
 
   async addSubscription(subscription) {
-    // Convert subscription to string for storage
-    const subscriptionString = JSON.stringify(subscription);
+    console.log('Adding new subscription:', {
+      endpoint: subscription.endpoint,
+      keys: subscription.keys ? Object.keys(subscription.keys) : null
+    });
     
-    // Add to Set (Set ensures uniqueness)
+    const subscriptionString = JSON.stringify(subscription);
     this.subscriptions.add(subscriptionString);
     
-    // Save to file
     await this.saveSubscriptions();
     
-    console.log(`Added new subscription. Total: ${this.subscriptions.size}`);
+    console.log(`Subscription added. Total: ${this.subscriptions.size}`);
     return this.subscriptions.size;
   }
 
@@ -114,4 +135,5 @@ export class PushNotificationService {
 }
 
 export const pushNotificationService = new PushNotificationService();
+
 

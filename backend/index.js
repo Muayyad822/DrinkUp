@@ -10,15 +10,22 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json());
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : [
+      'https://drink-up-nine.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:5174'
+    ];
+
 app.use(cors({
-  origin: [
-    'https://drink-up-nine.vercel.app',
-    'http://localhost:5173'
-  ],
+  origin: allowedOrigins,
   methods: ['GET', 'POST'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
+
+app.use(express.json());
 
 webpush.setVapidDetails(
   `mailto:${process.env.VAPID_EMAIL}`,
@@ -33,15 +40,25 @@ app.get('/api/vapid-public-key', (req, res) => {
 
 app.post('/api/save-subscription', async (req, res) => {
   try {
+    console.log('Received subscription request:', {
+      endpoint: req.body.endpoint,
+      keys: req.body.keys ? Object.keys(req.body.keys) : null
+    });
+    
     const subscription = req.body;
     const count = await pushNotificationService.addSubscription(subscription);
+    
+    console.log('Subscription saved successfully');
     res.status(201).json({ 
       message: 'Subscription saved',
       totalSubscriptions: count 
     });
   } catch (error) {
     console.error('Error saving subscription:', error);
-    res.status(500).json({ error: 'Subscription failed' });
+    res.status(500).json({ 
+      error: 'Subscription failed',
+      details: error.message 
+    });
   }
 });
 
