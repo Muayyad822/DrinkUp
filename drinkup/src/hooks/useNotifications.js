@@ -30,7 +30,7 @@ export default function useNotifications() {
 
         // Get existing subscription or create new one
         let subscription = await registration.pushManager.getSubscription();
-        
+
         if (!subscription) {
           const response = await fetch(`${BACKEND_URL}/api/vapid-public-key`);
           const { publicKey } = await response.json();
@@ -77,6 +77,7 @@ function urlBase64ToUint8Array(base64String) {
   }
   return outputArray;
 }
+
 
 
 

@@ -18,32 +18,53 @@ export class PushNotificationService {
     try {
       const data = await fs.readFile(this.subscriptionsFile, 'utf8');
       const subs = JSON.parse(data);
-      this.subscriptions = new Set(subs);
+      if (Array.isArray(subs)) {
+        this.subscriptions = new Set(subs);
+      } else {
+        this.subscriptions = new Set();
+      }
       console.log(`Loaded ${this.subscriptions.size} subscriptions`);
     } catch (error) {
-      console.log('No existing subscriptions found');
+      console.log('No existing subscriptions found, creating new storage');
       this.subscriptions = new Set();
+      // Create the file with an empty array
+      await this.saveSubscriptions();
     }
   }
 
   async saveSubscriptions() {
     try {
+      const subscriptionsArray = Array.from(this.subscriptions);
       await fs.writeFile(
         this.subscriptionsFile,
-        JSON.stringify([...this.subscriptions])
+        JSON.stringify(subscriptionsArray, null, 2)
       );
+      console.log(`Saved ${this.subscriptions.size} subscriptions`);
     } catch (error) {
       console.error('Error saving subscriptions:', error);
     }
   }
 
   async addSubscription(subscription) {
-    this.subscriptions.add(JSON.stringify(subscription));
+    // Convert subscription to string for storage
+    const subscriptionString = JSON.stringify(subscription);
+    
+    // Add to Set (Set ensures uniqueness)
+    this.subscriptions.add(subscriptionString);
+    
+    // Save to file
     await this.saveSubscriptions();
+    
+    console.log(`Added new subscription. Total: ${this.subscriptions.size}`);
     return this.subscriptions.size;
   }
 
   async sendCustomNotification(notificationData) {
+    if (this.subscriptions.size === 0) {
+      console.log('No subscriptions found. Attempting to reload...');
+      await this.loadSubscriptions();
+    }
+
     const payload = JSON.stringify({
       title: notificationData.title || 'DrinkUp 💧',
       body: notificationData.body || 'Time to drink some water!',
@@ -71,7 +92,8 @@ export class PushNotificationService {
         successCount.failed++;
         console.error('Failed to send notification:', {
           statusCode: error.statusCode,
-          message: error.message
+          message: error.message,
+          endpoint: JSON.parse(subString).endpoint
         });
         if (error.statusCode === 404 || error.statusCode === 410) {
           invalidSubscriptions.add(subString);
@@ -80,27 +102,16 @@ export class PushNotificationService {
     }
 
     if (invalidSubscriptions.size > 0) {
-      await this.removeInvalidSubscriptions(invalidSubscriptions);
+      console.log(`Removing ${invalidSubscriptions.size} invalid subscriptions`);
+      invalidSubscriptions.forEach(sub => {
+        this.subscriptions.delete(sub);
+      });
+      await this.saveSubscriptions();
     }
 
     return successCount;
   }
-
-  async removeInvalidSubscriptions(invalidSubscriptions) {
-    invalidSubscriptions.forEach(sub => {
-      this.subscriptions.delete(sub);
-    });
-
-    await this.saveSubscriptions();
-
-    if (invalidSubscriptions.size > 0) {
-      console.log(`Removed ${invalidSubscriptions.size} invalid subscriptions`);
-      console.log('Remaining subscriptions:', this.subscriptions.size);
-    }
-  }
 }
 
 export const pushNotificationService = new PushNotificationService();
-
-
 
